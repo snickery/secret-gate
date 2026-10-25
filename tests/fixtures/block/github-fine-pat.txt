@@ -1,0 +1,1 @@
+pat = github_pat_11ABCDEFG0aBcDeFgHiJkL_aBcDeFgHiJkLmNoPqRsTuVwXyZ0123abcd

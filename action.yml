@@ -1,0 +1,39 @@
+name: secret-gate
+description: Fail a push or PR that adds a committed secret (keys, tokens, high-entropy values under secret-named keys). Scans only added lines and never prints the secret.
+branding:
+  icon: shield
+  color: red
+inputs:
+  base:
+    description: Base SHA of the diff range (push before / PR base). Empty = new branch, scanned against the default-branch tip.
+    required: false
+    default: ""
+  head:
+    description: Head SHA of the diff range (push after / PR head). Defaults to HEAD.
+    required: false
+    default: ""
+  exclude:
+    description: Space-separated path globs to skip, e.g. test fixtures holding intentional fake secrets.
+    required: false
+    default: ""
+runs:
+  using: composite
+  steps:
+    # A new-branch push is scanned against the default-branch tip, which checkout
+    # doesn't fetch. Fetch it shallowly (one commit, no blobs) when missing;
+    # best-effort, since the scan falls back to the empty tree.
+    - shell: bash
+      env:
+        DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
+      run: |
+        [ -n "$DEFAULT_BRANCH" ] || exit 0
+        git rev-parse --verify --quiet "origin/${DEFAULT_BRANCH}^{commit}" >/dev/null 2>&1 && exit 0
+        git fetch --no-tags --depth=1 --filter=blob:none origin \
+          "+refs/heads/${DEFAULT_BRANCH}:refs/remotes/origin/${DEFAULT_BRANCH}" 2>/dev/null || true
+    - shell: bash
+      env:
+        BASE_SHA: ${{ inputs.base }}
+        HEAD_SHA: ${{ inputs.head }}
+        SECRET_GATE_EXCLUDE: ${{ inputs.exclude }}
+        DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
+      run: bash "$GITHUB_ACTION_PATH/secret-gate.sh"
