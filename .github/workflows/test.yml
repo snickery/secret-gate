@@ -12,7 +12,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
-      - run: bash tests/run.sh
+      - run: bash ci/gate-test/run.sh
 
   self-gate:
     runs-on: ubuntu-latest
@@ -23,4 +23,4 @@ jobs:
         with:
           base: ${{ github.event.pull_request.base.sha || github.event.before }}
           head: ${{ github.event.pull_request.head.sha || github.sha }}
-          exclude: tests/fixtures/*
+          exclude: ci/gate-test/fixtures/*

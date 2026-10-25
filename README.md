@@ -18,7 +18,7 @@ jobs:
         with:
           base: ${{ github.event.pull_request.base.sha || github.event.before }}
           head: ${{ github.event.pull_request.head.sha || github.sha }}
-          # exclude: tests/fixtures/*     # optional: paths holding intentional fake secrets
+          # exclude: ci/gate-test/fixtures/*   # optional: paths holding intentional fake secrets
 ```
 
 On Forgejo the same workflow works from `.forgejo/workflows/`. The short `snickery/secret-gate@v1`
@@ -55,7 +55,7 @@ pass, and the line reader must return what it was given. If any of them fails, i
 bash secret-gate.sh <base> <head>        # e.g. origin/main HEAD
 ```
 
-It works on bash 3.2 (macOS) and bash 5. Tests: `bash tests/run.sh`, the fixture corpus in
-`tests/fixtures/{block,pass}`.
+It works on bash 3.2 (macOS) and bash 5. Tests: `bash ci/gate-test/run.sh`, the fixture corpus in
+`ci/gate-test/fixtures/{block,pass}`.
 
 MIT licensed.

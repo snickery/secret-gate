@@ -34,6 +34,9 @@
 # error under `set -u` on 3.2, so use ${arr[@]+"${arr[@]}"}.
 
 set -uo pipefail
+# Byte-wise text handling: BSD/macOS sed rejects a line that isn't valid UTF-8
+# ("illegal byte sequence") and drops it, so a secret on such a line went unscanned.
+export LC_ALL=C
 
 # Fail closed on an abort before the scan finishes: exit 2 ("scanner broken"),
 # never 0 (false clean) and never 1 (false secret finding).

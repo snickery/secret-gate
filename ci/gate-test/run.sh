@@ -6,8 +6,9 @@
 # Plus: a broken environment exits 2 (never 1 or 0), and SECRET_GATE_EXCLUDE skips.
 # Runs on bash 3.2 (macOS) and bash 5.
 set -uo pipefail
+export LC_ALL=C   # byte-wise, like the scanner (fixtures include non-UTF-8 bytes)
 HERE=$(cd "$(dirname "$0")" && pwd)
-GATE="$HERE/../secret-gate.sh"
+GATE="$HERE/../../secret-gate.sh"
 [ -f "$GATE" ] || { echo "FATAL: $GATE not found" >&2; exit 2; }
 
 tmp=$(mktemp -d); trap 'rm -rf "$tmp"' EXIT
@@ -32,7 +33,7 @@ run_one() {  # <want-exit> <fixture>
     if [ "$want" = 1 ]; then
         # A probe from the middle of the secret VALUE must never appear in output.
         probe=$(head -n 1 "$f" | sed -E 's/^[^:=]*[:=][[:space:]]*//; s/^["'"'"']//' | cut -c5-16)
-        case "$out" in *"$probe"*) check "$name (no-leak)" leak printed ;; *) check "$name (no-leak)" ok ok ;; esac
+        case "$out" in *"$probe"*) check "$name (no-leak)" not-printed printed ;; *) check "$name (no-leak)" not-printed not-printed ;; esac
     fi
     git rm -q case.fixture >/dev/null; git commit -q -m rm
 }
