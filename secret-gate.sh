@@ -185,11 +185,16 @@ if [ "${#added[@]}" -ne 3 ] || [ "${added[0]}" != "alpha" ] \
 fi
 
 for f in $staged_files; do
+    # Split the patterns with pathname expansion OFF: unquoted, `dir/*` would glob
+    # against the checkout first and become the names of what's in dir/ (e.g. its
+    # subdirectories), which then match no file. -f keeps each pattern literal.
     skip=0
+    set -f
     for g in ${SECRET_GATE_EXCLUDE:-}; do
         # shellcheck disable=SC2254  # glob match on purpose
         case "$f" in $g) skip=1 ;; esac
     done
+    set +f
     [ "$skip" = 1 ] && continue
 
     # Added lines for this file (strip the leading '+').

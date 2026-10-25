@@ -6,9 +6,10 @@ on:
   push:
   pull_request:
 
+# Never cancel: each run scans only its own push, so a cancelled run is an
+# unscanned push (the fleet's pattern; no group, which would cancel pending runs).
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: false   # never cancel a superseded gate run
+  cancel-in-progress: false
 
 jobs:
   corpus:

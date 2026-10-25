@@ -47,6 +47,9 @@ echo "── exclude + broken environment ──"
 mkdir -p fake; cp "$HERE/fixtures/block/github-pat.txt" fake/x.txt; git add fake; git commit -q -m fake
 BASE_SHA="HEAD~1" HEAD_SHA="HEAD" SECRET_GATE_EXCLUDE="fake/*" bash "$GATE" >/dev/null 2>&1; check "excluded path is skipped" 0 $?
 BASE_SHA="HEAD~1" HEAD_SHA="HEAD" bash "$GATE" >/dev/null 2>&1; check "same path without exclude" 1 $?
+mkdir -p deep/sub; cp "$HERE/fixtures/block/github-pat.txt" deep/sub/y.txt; git add deep; git commit -q -m deep
+BASE_SHA="HEAD~1" HEAD_SHA="HEAD" SECRET_GATE_EXCLUDE="deep/*" bash "$GATE" >/dev/null 2>&1; check "exclude covers nested paths" 0 $?
+BASE_SHA="HEAD~1" HEAD_SHA="HEAD" SECRET_GATE_EXCLUDE="other/* deep/sub/*" bash "$GATE" >/dev/null 2>&1; check "second of two patterns applies" 0 $?
 ( cd "$tmp" && BASE_SHA=x HEAD_SHA=y bash "$GATE" >/dev/null 2>&1 ); check "not a git repo -> exit 2" 2 $?
 BASE_SHA="HEAD~1" HEAD_SHA="0123456789abcdef0123456789abcdef01234567" bash "$GATE" >/dev/null 2>&1; check "unreachable head SHA -> exit 2" 2 $?
 
